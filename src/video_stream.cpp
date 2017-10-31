@@ -103,6 +103,10 @@ int main(int argc, char** argv)
         return -1;
     }
 
+    bool loop_video;
+    _nh.param("loop_video", loop_video, false);
+    ROS_INFO_STREAM("Loop video: " << (loop_video ? "yes" : "no" ));
+    
     std::string camera_name;
     _nh.param("camera_name", camera_name, std::string("camera"));
     ROS_INFO_STREAM("Camera name: " << camera_name);
@@ -189,8 +193,12 @@ int main(int argc, char** argv)
                 // The timestamps are in sync thanks to this publisher
                 pub.publish(*msg, cam_info_msg, ros::Time::now());
             }
-
             ros::spinOnce();
+        }
+        
+        if (frame.empty() && loop_video)
+        {
+            cap.set(CV_CAP_PROP_POS_FRAMES, 0);
         }
         r.sleep();
     }
